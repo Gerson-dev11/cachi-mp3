@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
@@ -32,7 +33,7 @@ class _DescargadorPageState extends State<DescargadorPage> {
   AudioPlayer player = AudioPlayer();
   List<File> canciones = [];
 
-  final String backendURL = "https://TU-SERVIDOR-RENDER/download"; // Cambiá por tu URL
+  final String backendURL = "https://cachimp3-1.onrender.com/download";
 
   @override
   void initState() {
@@ -62,7 +63,7 @@ class _DescargadorPageState extends State<DescargadorPage> {
       final response = await http.post(
         Uri.parse(backendURL),
         headers: {"Content-Type": "application/json"},
-        body: '{"url": "$youtubeUrl"}',
+        body: jsonEncode({"url": youtubeUrl}),
       );
 
       if (response.statusCode != 200) {
@@ -73,8 +74,9 @@ class _DescargadorPageState extends State<DescargadorPage> {
       }
 
       // Parseamos la respuesta JSON
-      final filename = RegExp(r'"filename":"(.*?)"').firstMatch(response.body)!.group(1)!;
-      final fileURL = "https://TU-SERVIDOR-RENDER/file/$filename";
+      final data = jsonDecode(response.body);
+      final filename = data['filename'];
+      final fileURL = "https://cachimp3-1.onrender.com/file/$filename";
 
       // Carpeta local
       Directory dir = await obtenerCarpeta();
